@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Twilight Labs - Account Generator</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(90deg, #000000, #1e90ff, #4169e1, #000000);
+            background-size: 600% 600%;
+            animation: gradientShift 18s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            color: #1E90FF;
+            text-align: center;
+            padding: 20px;
+        }
+        @keyframes gradientShift {
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 0 30px rgba(30, 144, 255, 0.7);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px rgba(30, 144, 255, 0.9);
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 12px 0;
+            font-size: 1rem;
+            border: 2px solid #1E90FF;
+            border-radius: 8px;
+            background: transparent;
+            color: #1E90FF;
+            outline: none;
+            box-sizing: border-box;
+            text-shadow: none;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder {
+            color: rgba(30, 144, 255, 0.7);
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #00FF7F;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        button.btn {
+            flex: 1;
+            padding: 15px 0;
+            background-color: transparent;
+            border: 2px solid #1E90FF;
+            color: #1E90FF;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: none;
+        }
+        button.btn:hover {
+            background-color: #1E90FF;
+            color: #000000;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+        button.btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        p.message {
+            margin-top: 18px;
+            font-size: 1rem;
+            text-shadow: none;
+            word-break: break-word;
+            min-height: 1.2em;
+        }
+        p.error {
+            color: #FF4500;
+        }
+        p.success {
+            color: #00FF7F;
+        }
+        @media (max-width: 400px) {
+            .container {
+                padding: 20px 25px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Dev Account</h1>
+        <input type="text" id="usernameInput" placeholder="Username" autocomplete="off" />
+        <input type="password" id="passwordInput" placeholder="Password" autocomplete="new-password" />
+        <div class="btn-container">
+            <button class="btn" onclick="generateAccount()">Generate</button>
+            <button class="btn" onclick="resetForm()">Reset</button>
+        </div>
+        <p id="accountMessage" class="message"></p>
+    </div>
+
+    <script>
+        const accountMessage = document.getElementById('accountMessage');
+        const usernameInput = document.getElementById('usernameInput');
+        const passwordInput = document.getElementById('passwordInput');
+
+        // Generate 100-character secret key
+        function generateSecretKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+            let key = '';
+            for (let i = 0; i < 100; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return key;
+        }
+
+        // Convert ArrayBuffer to Base64 string
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        async function generateAccount() {
+            accountMessage.textContent = '';
+            accountMessage.className = 'message';
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!username) {
+                accountMessage.textContent = 'Username is required.';
+                accountMessage.classList.add('error');
+                return;
+            }
+            if (username.length < 3 || username.length > 20) {
+                accountMessage.textContent = 'Username must be between 3 and 20 characters.';
+                accountMessage.classList.add('error');
+                return;
+            }
+            if (!password) {
+                accountMessage.textContent = 'Password is required.';
+                accountMessage.classList.add('error');
+                return;
+            }
+            if (password.length < 8) {
+                accountMessage.textContent = 'Password must be at least 8 characters.';
+                accountMessage.classList.add('error');
+                return;
+            }
+
+            try {
+                const secretKey = generateSecretKey();
+
+                // Prepare data to encrypt
+                const data = { username, secretKey, gems: 0 };
+
+                const encoder = new TextEncoder();
+
+                // Generate random AES-GCM data key
+                const dataKey = await crypto.subtle.generateKey(
+                    { name: 'AES-GCM', length: 256 },
+                    true,
+                    ['encrypt', 'decrypt']
+                );
+
+                const dataBuffer = encoder.encode(JSON.stringify(data));
+                const ivData = crypto.getRandomValues(new Uint8Array(12));
+
+                const encryptedData = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv: ivData },
+                    dataKey,
+                    dataBuffer
+                );
+
+                const exportedDataKey = await crypto.subtle.exportKey('raw', dataKey);
+
+                // Derive key from password using PBKDF2
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+                const passphraseKey = await crypto.subtle.importKey(
+                    'raw',
+                    encoder.encode(password),
+                    'PBKDF2',
+                    false,
+                    ['deriveKey']
+                );
+
+                const derivedKey = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt,
+                        iterations: 100000,
+                        hash: 'SHA-256'
+                    },
+                    passphraseKey,
+                    { name: 'AES-GCM', length: 256 },
+                    true,
+                    ['encrypt']
+                );
+
+                // Encrypt data key with derived key
+                const ivKey = crypto.getRandomValues(new Uint8Array(12));
+                const encryptedKey = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv: ivKey },
+                    derivedKey,
+                    exportedDataKey
+                );
+
+                // Construct backup object (account file)
+                const accountFileObject = {
+                    encryptedData: arrayBufferToBase64(encryptedData),
+                    dataIv: arrayBufferToBase64(ivData),
+                    encryptedKey: arrayBufferToBase64(encryptedKey),
+                    keyIv: arrayBufferToBase64(ivKey),
+                    salt: arrayBufferToBase64(salt)
+                };
+
+                // Download as file
+                const blob = new Blob([JSON.stringify(accountFileObject, null, 2)], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `twilight_labs_account_${username}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                // Show success message and clear inputs
+                accountMessage.textContent = `Account for "${username}" generated successfully! File downloaded.`;
+                accountMessage.classList.add('success');
+
+                usernameInput.value = '';
+                passwordInput.value = '';
+            } catch (err) {
+                console.error(err);
+                accountMessage.textContent = 'Failed to generate account: ' + err.message;
+                accountMessage.classList.add('error');
+            }
+        }
+
+        function resetForm() {
+            usernameInput.value = '';
+            passwordInput.value = '';
+            accountMessage.textContent = '';
+            accountMessage.className = 'message';
+        }
+    </script>
+</body>
+</html>
+
