@@ -1,17 +1,9 @@
-# TwilightsWebKitLegacy
+# Twilight's WebKit Legacy
 
 ## Overview
-This repository is part of the TwilightOnSol ecosystem. It has been audited and refactored for better performance and maintainability.
+A repository containing a collection of legacy web experiments, HTML embeds, and early UI components. It serves as an archive of various web development explorations.
 
-## Project Structure
-- README.md
-- Manus AI feedback & overview
-- Embeds/coinspin.html
-- Embeds/cointrack.html
-- Embeds/gpt-broken.html
-- Embeds/index.html
-- Runa-lol-main/index.html
-- Runa-lol-main/runa.png
-- WebHubLegacy/dashboard.html
-- WebHubLegacy/gems.js
-- ...
+## Features
+- **Web Embeds**: Includes tools like coin spinners and trackers.
+- **UI Experiments**: Early versions of dashboards and web hubs.
+- **Code Archive**: A diverse range of HTML/JS snippets from different projects.
