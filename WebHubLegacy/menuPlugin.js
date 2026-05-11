@@ -215,7 +215,7 @@ const MenuPlugin = {
                 <option value="">Select a playlist</option>
             </select>
             <div id="spotifyPlayer" style="display: none;">
-                <iframe id="spotifyIframe" src="" width="100%" height="80" frameborder="0" 
+                <iframe id="spotifyIframe" src="" width="100%" height="80" frameborder="0"
                         allowtransparency="true" allow="encrypted-media" title="Spotify Player"></iframe>
                 <div id="playerControls" class="player-controls">
                     <button id="playPause" aria-label="Play or pause track">Play</button>
